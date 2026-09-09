@@ -1,36 +1,91 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Portfolio website
 
-## Getting Started
+Personal portfolio built with [Next.js 16](https://nextjs.org) (App Router),
+TypeScript and Tailwind CSS v4.
 
-First, run the development server:
+## Getting started
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open http://localhost:3000.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Copy `.env.example` to `.env.local` and set `NEXT_PUBLIC_SITE_URL` to your real
+domain — it is used for metadata, Open Graph tags and the sitemap.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Scripts
 
-## Learn More
+| Command         | What it does                                  |
+| --------------- | --------------------------------------------- |
+| `npm run dev`   | Dev server with hot reload                     |
+| `npm run build` | Production build (typechecks and prerenders)   |
+| `npm start`     | Serve the production build                     |
+| `npm run lint`  | ESLint                                         |
 
-To learn more about Next.js, take a look at the following resources:
+## Architecture
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```
+src/
+├── app/                        Routes (App Router)
+│   ├── layout.tsx              Root layout: fonts, metadata, Header + Footer
+│   ├── page.tsx                Home — hero, featured projects, skills
+│   ├── about/page.tsx          About — bio + experience timeline
+│   ├── projects/page.tsx       Project index
+│   ├── projects/[slug]/        Project detail (statically generated)
+│   ├── contact/page.tsx        Contact form
+│   ├── contact/actions.ts      Server Action handling the form submission
+│   ├── error.tsx               Error boundary
+│   ├── loading.tsx             Route-level loading state
+│   ├── not-found.tsx           404 page
+│   ├── sitemap.ts              Generated /sitemap.xml
+│   ├── robots.ts               Generated /robots.txt
+│   └── globals.css             Tailwind import + design tokens
+├── components/
+│   ├── ui/                     Primitives: Container, Section, Button, Tag
+│   ├── layout/                 Header (client, mobile nav), Footer
+│   ├── home/                   Hero
+│   ├── projects/               ProjectCard, ProjectGrid
+│   ├── about/                  Timeline
+│   └── contact/                ContactForm (client, useActionState)
+├── content/                    ← edit these to make the site yours
+│   ├── site.ts                 Name, role, nav, socials, SEO defaults
+│   ├── projects.ts             Project entries + query helpers
+│   ├── experience.ts           Work history
+│   └── skills.ts               Skill groups
+├── lib/                        cn(), formatRange(), contact form state
+└── types/                      Shared TypeScript types
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Everything is a Server Component except `Header` and `ContactForm`, which need
+client state.
 
-## Deploy on Vercel
+### Adding a project
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Add an entry to `src/content/projects.ts`. The index page, the detail page at
+`/projects/<slug>`, and the sitemap all pick it up automatically —
+`generateStaticParams` prerenders one page per entry. Set `featured: true` to
+surface it on the home page.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Because `dynamicParams = false` on the detail route, only slugs present at build
+time are served; anything else returns a real 404.
+
+### Design tokens
+
+Colors live as CSS variables in `src/app/globals.css` (`--background`,
+`--surface`, `--foreground`, `--muted`, `--border`, `--accent`), exposed to
+Tailwind through `@theme inline` as `bg-surface`, `text-muted`, etc. Dark mode
+follows `prefers-color-scheme`; change the palette in one place.
+
+### Contact form
+
+`ContactForm` calls the `submitContactForm` Server Action via `useActionState`.
+The action validates the fields and includes a honeypot, but does not yet
+deliver anything — wire up an email provider (Resend, Postmark, …) where the
+`TODO` is in `src/app/contact/actions.ts`, reading credentials from environment
+variables.
+
+## Placeholders to replace
+
+Search the repo for `TODO` — the copy in `src/content/*` and the hero/about
+paragraphs are all placeholders.
