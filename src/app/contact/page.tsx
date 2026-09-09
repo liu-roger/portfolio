@@ -17,27 +17,20 @@ export default function ContactPage() {
       <ContactForm />
 
       <div className="mt-12 border-t border-border pt-6 text-sm text-muted">
-        <p>
-          Prefer email?{" "}
-          <a href={`mailto:${site.email}`} className="hover:text-foreground">
-            {site.email}
-          </a>
-        </p>
+        <p>Find me elsewhere:</p>
         <ul className="mt-3 flex gap-4">
-          {socialLinks
-            .filter((link) => link.href.startsWith("http"))
-            .map((link) => (
-              <li key={link.label}>
-                <a
-                  href={link.href}
-                  target="_blank"
-                  rel="noreferrer noopener"
-                  className="hover:text-foreground"
-                >
-                  {link.label}
-                </a>
-              </li>
-            ))}
+          {socialLinks.map((link) => (
+            <li key={link.label}>
+              <a
+                href={link.href}
+                target="_blank"
+                rel="noreferrer noopener"
+                className="hover:text-foreground"
+              >
+                {link.label}
+              </a>
+            </li>
+          ))}
         </ul>
       </div>
     </Section>

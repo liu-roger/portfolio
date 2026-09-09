@@ -38,7 +38,6 @@ export const site = {
     "Portfolio of Roger Liu — software engineer. Selected projects, experience and ways to get in touch.",
   /** Absolute origin, no trailing slash. Used by metadataBase and the sitemap. */
   url: resolveSiteUrl(),
-  email: "rogerliu80@gmail.com",
   location: "TODO: City, Country",
 } as const;
 
@@ -49,8 +48,11 @@ export const navItems: NavItem[] = [
   { href: "/contact", label: "Contact" },
 ];
 
+/**
+ * Deliberately no email address here — the contact form is the only way to
+ * reach out, so the address is never published in the page source.
+ */
 export const socialLinks: SocialLink[] = [
   { label: "GitHub", href: "https://github.com/TODO" },
   { label: "LinkedIn", href: "https://linkedin.com/in/TODO" },
-  { label: "Email", href: `mailto:${site.email}` },
 ];
