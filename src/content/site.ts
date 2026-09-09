@@ -1,6 +1,31 @@
 import type { NavItem, SocialLink } from "@/types";
 
 /**
+ * Resolve the canonical origin, in priority order. An env var that exists but
+ * is empty counts as unset — Vercel returns "" for a variable added without a
+ * value, and `new URL("")` throws.
+ *
+ * The VERCEL_* fallbacks are bare domains with no protocol scheme, so one is
+ * added here.
+ */
+function resolveSiteUrl(): string {
+  const candidates = [
+    process.env.NEXT_PUBLIC_SITE_URL,
+    process.env.NEXT_PUBLIC_VERCEL_PROJECT_PRODUCTION_URL,
+    process.env.NEXT_PUBLIC_VERCEL_URL,
+  ];
+
+  for (const candidate of candidates) {
+    const value = candidate?.trim();
+    if (!value) continue;
+    const absolute = /^https?:\/\//.test(value) ? value : `https://${value}`;
+    return absolute.replace(/\/+$/, "");
+  }
+
+  return "http://localhost:3000";
+}
+
+/**
  * Single source of truth for site-wide copy, links and SEO defaults.
  * Replace the placeholder values below with your own.
  */
@@ -11,8 +36,8 @@ export const site = {
   shortDescription: "Software engineer building fast, thoughtful web products.",
   description:
     "Portfolio of Roger Liu — software engineer. Selected projects, experience and ways to get in touch.",
-  /** No trailing slash. Also used as metadataBase and in the sitemap. */
-  url: process.env.NEXT_PUBLIC_SITE_URL ?? "https://example.com",
+  /** Absolute origin, no trailing slash. Used by metadataBase and the sitemap. */
+  url: resolveSiteUrl(),
   email: "rogerliu80@gmail.com",
   location: "TODO: City, Country",
 } as const;
